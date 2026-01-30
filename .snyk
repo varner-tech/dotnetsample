@@ -1,5 +1,5 @@
 # Snyk policy file, patches or ignores known vulns
-version: v.1.25.0
+version: v1.25.0
 ignore:
   SNYK-DOTNET-NEWTONSOFTJSON-2774678:
     - '*':
