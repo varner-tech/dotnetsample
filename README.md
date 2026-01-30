@@ -12,6 +12,27 @@ You can try out an early access release of the .NET Framework at the [.NET Frame
 
 This guide walks you through scanning this .NET repository for security vulnerabilities using Snyk. Follow these steps to perform Software Composition Analysis (SCA) and Static Application Security Testing (SAST), then monitor results in the Snyk dashboard.
 
+### Understanding Test vs Monitor
+
+Snyk provides two ways to scan and track vulnerabilities:
+
+| Command | Purpose | Dashboard | Continuous Monitoring |
+|---------|---------|-----------|----------------------|
+| `snyk test` | Run a local scan, view results in terminal | No | No |
+| `snyk monitor` | Upload scan results to Snyk dashboard | Yes | Yes - alerts on new vulnerabilities |
+| `snyk code test` | Run SAST scan locally | No | No |
+| `snyk code test --report` | Upload SAST results to dashboard | Yes | No - snapshot only |
+
+**Key differences:**
+
+- **`snyk test`** - Scans your project and displays results locally. Use this for quick checks during development. Results are not saved to the dashboard.
+
+- **`snyk monitor`** - Uploads a snapshot of your dependencies to the Snyk dashboard. Snyk will **continuously monitor** for new vulnerabilities and alert you when new issues are discovered, even after the scan completes. **This is only available for SCA (open source) scans.**
+
+- **`snyk code test --report`** - Uploads SAST results to the dashboard as a **point-in-time snapshot**. Unlike `monitor`, there is no continuous monitoring for SAST scans. You must re-run the command to get updated results.
+
+> **Important:** There is no `snyk code monitor` command. SAST scans use `snyk code test --report` to upload results to the dashboard, but this creates a snapshot rather than enabling continuous monitoring.
+
 ### Prerequisites
 
 Before you begin, ensure you have the following installed:
@@ -189,6 +210,55 @@ Add `-d` for debug output to troubleshoot issues:
 ```bash
 snyk test --all-projects -d
 ```
+
+---
+
+### Organizing Projects with Collections
+
+Since SCA and SAST scans appear as separate targets in the Snyk dashboard, you can use **Project Collections** to organize and group them together for easier management.
+
+#### What are Project Collections?
+
+Project Collections allow you to aggregate and organize Projects from multiple targets into a single view. This is especially useful when:
+
+- You have SCA and SAST scans from the same repository appearing as separate targets
+- You want to group projects by team, application, or business unit
+- You need to perform bulk actions across multiple projects
+
+#### Creating a Collection
+
+1. Go to your **Projects** page in the Snyk dashboard
+2. Select the **Collections** tab
+3. Click **Create collection**
+4. Enter a name for your collection (e.g., "dotnetsample - All Scans")
+5. Add projects from both your SCA and SAST targets to the collection
+
+#### Benefits of Collections
+
+- **Unified View:** See all related projects (SCA + SAST) in one place
+- **Bulk Actions:** Delete, activate, or deactivate multiple projects at once
+- **Reporting:** Generate reports across all projects in a collection
+- **Team Collaboration:** Share saved views with your organization
+
+#### Automated Collections (Early Access)
+
+Snyk can automatically group projects by repository URL. When enabled:
+
+- Projects from the same repo (even from different integrations like SCM and CLI) are grouped together
+- Automated collections are identified by a different icon and named by repo URL
+- This helps manage duplicate targets from different scan sources
+
+To enable Automated Collections:
+1. Go to **Organization Settings**
+2. Find the Automated Collections option
+3. Enable the feature
+
+> **Note:** Automated Collections is an Early Access feature available to Enterprise customers. It currently supports GitHub, GitHub Enterprise, GitLab, Bitbucket Cloud, and Azure integrations. CLI-based scans and SAST scans uploaded via `snyk code test --report` are not automatically grouped.
+
+#### Resources
+
+- [Project Collections Documentation](https://docs.snyk.io/snyk-admin/snyk-projects/project-collections-groupings)
+- [Snyk API for Collections](https://docs.snyk.io/snyk-api)
 
 ---
 
