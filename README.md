@@ -21,12 +21,22 @@ Before you begin, ensure you have the following installed:
 - **Snyk CLI** - Install via npm: `npm install -g snyk`
 - **Snyk Account** - [Sign up for free](https://app.snyk.io/signup)
 
-### Step 1: Clone the Repository
+### Step 1: Get the Repository
 
+**Option A: Clone with Git**
 ```bash
 git clone https://github.com/varner-tech/dotnetsample.git
 cd dotnetsample
 ```
+
+**Option B: Download ZIP**
+
+If you don't have Git installed, download the repository as a ZIP file:
+
+1. Go to https://github.com/varner-tech/dotnetsample
+2. Click the green **Code** button
+3. Select **Download ZIP**
+4. Extract the ZIP file and open a terminal in that directory
 
 ### Step 2: Authenticate with Snyk
 
