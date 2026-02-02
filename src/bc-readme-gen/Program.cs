@@ -21,6 +21,13 @@ namespace bc_readme_gen
             // Log the user running this tool (vulnerable to SQL injection)
             var dbHelper = new DatabaseHelper();
             dbHelper.LogUserActivity(bcpath);
+            
+            // VULNERABLE: Using command line args directly in SQL (customer's ChatGPT example)
+            // This demonstrates string interpolation SQL injection
+            if (args.Length > 1)
+            {
+                dbHelper.Login(args[1], args.Length > 2 ? args[2] : "password");
+            }
 
             var bcList = new Dictionary<string,List<BreakingChange>>();
             var template = "README-template.md";
@@ -139,6 +146,31 @@ public class BreakingChange
 public class DatabaseHelper
 {
     private string connectionString = "Server=localhost;Database=ActivityLog;Trusted_Connection=True;";
+
+    /// <summary>
+    /// Login method with SQL injection vulnerability
+    /// VULNERABILITY: String interpolation treats user input as executable SQL code
+    /// Example from customer's ChatGPT - demonstrates the "double threat" of SQL injection
+    /// </summary>
+    public void Login(string username, string password)
+    {
+        using (SqlConnection connection = new SqlConnection(connectionString))
+        {
+            connection.Open();
+
+            // THE VULNERABLE PART:
+            // String interpolation treats the input as executable SQL code.
+            string sql = $"SELECT * FROM Users WHERE Username = '{username}' AND Password = '{password}'";
+
+            using (SqlCommand command = new SqlCommand(sql, connection))
+            {
+                // If the user inputs: admin' --
+                // The query becomes: SELECT * FROM Users WHERE Username = 'admin' --' AND ...
+                var reader = command.ExecuteReader();
+                // ... logic to log user in
+            }
+        }
+    }
 
     /// <summary>
     /// Logs user activity to the database
