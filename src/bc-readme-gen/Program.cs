@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Text;
+using System.Data.SqlClient;
 
 namespace bc_readme_gen
 {
@@ -16,6 +17,10 @@ namespace bc_readme_gen
             }
             
             string bcpath = args[0];
+            
+            // Log the user running this tool (vulnerable to SQL injection)
+            var dbHelper = new DatabaseHelper();
+            dbHelper.LogUserActivity(bcpath);
 
             var bcList = new Dictionary<string,List<BreakingChange>>();
             var template = "README-template.md";
@@ -125,4 +130,65 @@ public class BreakingChange
     public string Title;
     public string Path;
     public string Version;
+}
+
+/// <summary>
+/// Database helper class for logging user activity
+/// WARNING: This class contains intentional security vulnerabilities for testing purposes
+/// </summary>
+public class DatabaseHelper
+{
+    private string connectionString = "Server=localhost;Database=ActivityLog;Trusted_Connection=True;";
+
+    /// <summary>
+    /// Logs user activity to the database
+    /// VULNERABILITY: SQL Injection - user input is concatenated directly into SQL query
+    /// </summary>
+    public void LogUserActivity(string userInput)
+    {
+        // INSECURE: SQL Injection vulnerability - user input directly concatenated
+        string query = "SELECT * FROM ActivityLog WHERE Path = '" + userInput + "'";
+        
+        using (SqlConnection connection = new SqlConnection(connectionString))
+        {
+            SqlCommand command = new SqlCommand(query, connection);
+            try
+            {
+                connection.Open();
+                SqlDataReader reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    Console.WriteLine("Activity found: " + reader[0]);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log error but continue - this is just activity logging
+                Console.WriteLine("Database logging unavailable: " + ex.Message);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Another vulnerable method - searches for users
+    /// VULNERABILITY: SQL Injection via string concatenation
+    /// </summary>
+    public void SearchUser(string username)
+    {
+        // INSECURE: Building SQL query with string concatenation
+        string sql = "SELECT id, username, email FROM Users WHERE username = '" + username + "'";
+        
+        using (var conn = new SqlConnection(connectionString))
+        {
+            conn.Open();
+            using (var cmd = new SqlCommand(sql, conn))
+            {
+                var reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    Console.WriteLine($"User: {reader["username"]}, Email: {reader["email"]}");
+                }
+            }
+        }
+    }
 }

@@ -6,6 +6,3 @@ ignore:
       reason: Testing snyk file
       expires: 2025-12-31T23:59:59Z
 patch: {}
-exclude:
-  global:
-    - src/bc-readme-gen/Program.cs
